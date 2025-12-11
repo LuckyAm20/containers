@@ -1,0 +1,44 @@
+# ----- STAGE 1: Build dependencies -----
+FROM python:3.11-slim AS builder
+
+# Не тянем лишний мусор
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+# Устанавливаем build-deps (только во время сборки)
+RUN apt-get update && apt-get install -y --no-install-recommends gcc
+
+# Копируем зависимости
+COPY requirements.txt .
+
+# Устанавливаем зависимости в отдельную директорию — best practice
+RUN pip install --prefix=/install -r requirements.txt
+
+
+# ----- STAGE 2: Minimal runtime image -----
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+# Создаём non-root user — best practice
+RUN groupadd -r app && useradd -r -g app app
+
+# Копируем установленные зависимости
+COPY --from=builder /install /usr/local
+
+# Копируем исходники
+COPY app.py .
+
+# Меняем владельца
+RUN chown -R app:app /app
+USER app
+
+EXPOSE 8000
+
+# Команда запуска
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]

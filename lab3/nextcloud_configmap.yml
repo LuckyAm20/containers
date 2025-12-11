@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nextcloud-configmap
+  labels:
+    app: nextcloud
+data:
+  NEXTCLOUD_UPDATE: "1"
+  ALLOW_EMPTY_PASSWORD: "yes"
+  POSTGRES_HOST: "postgres-service"
+  NEXTCLOUD_TRUSTED_DOMAINS: "localhost nextcloud-service 127.0.0.1"
+  NEXTCLOUD_ADMIN_USER: "masha25"
+
