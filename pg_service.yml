@@ -4,10 +4,13 @@ metadata:
   name: postgres-service
   labels:
     app: postgres
+    tier: database
+    lab: lab4
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
     - port: 5432
   selector:
     app: postgres
+    tier: database
 

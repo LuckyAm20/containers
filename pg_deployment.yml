@@ -2,15 +2,24 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres
+  labels:
+    app: postgres
+    tier: database
+    component: storage
+    lab: lab4
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: postgres
+      tier: database
   template:
     metadata:
       labels:
         app: postgres
+        tier: database
+        component: storage
+        lab: lab4
     spec:
       containers:
         - name: postgres-container

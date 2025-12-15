@@ -4,6 +4,8 @@ metadata:
   name: nextcloud-configmap
   labels:
     app: nextcloud
+    tier: backend
+    lab: lab4
 data:
   NEXTCLOUD_UPDATE: "1"
   ALLOW_EMPTY_PASSWORD: "yes"
