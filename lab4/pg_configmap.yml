@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-configmap
+  labels:
+    app: postgres
+    tier: database
+    lab: lab4
+data:
+  POSTGRES_DB: "nextcloud"
+
