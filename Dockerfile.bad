@@ -1,0 +1,20 @@
+# Bad practice 1: используем latest (нефиксированный и нестабильный тег)
+FROM python:latest
+
+# Bad practice 2: работаем под root (по умолчанию), ничего не меняем
+# Контейнер остаётся небезопасным
+
+# Bad practice 3: копируем ВСЁ подряд (нет .dockerignore)
+COPY . /app
+
+WORKDIR /app
+
+# Bad practice 4: обновляем apt и устанавливаем пакеты в одном RUN без очистки кешей
+RUN apt-get update && apt-get install -y gcc curl
+
+# Bad practice 5: ставим зависимости напрямую в runtime, без multi-stage
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+# Bad practice 6: жестко вшитый командный запуск без порта в EXPOSE
+CMD uvicorn app:app --host 0.0.0.0 --port 8000
+
