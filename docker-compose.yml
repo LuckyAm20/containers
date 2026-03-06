@@ -1,0 +1,72 @@
+version: "3.9"
+
+services:
+  init-db:
+    image: postgres:16
+    container_name: todo-init
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    command: [
+      "bash", "-c",
+      "echo 'Waiting for DB and creating init_log table...' && \
+       PGPASSWORD=$POSTGRES_PASSWORD psql -h db -U $POSTGRES_USER -d $POSTGRES_DB \
+       -c 'CREATE TABLE IF NOT EXISTS init_log( \
+              id serial primary key, \
+              created_at timestamptz default now() \
+           );' && \
+       echo 'Init done'"
+    ]
+    restart: "no"
+    networks:
+      - app-net
+
+  db:
+    image: postgres:16
+    container_name: todo-db
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - todo_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-net
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.good
+    image: todo-good:latest
+    container_name: todo-app
+    depends_on:
+      db:
+        condition: service_healthy
+      init-db:
+        condition: service_completed_successfully
+    env_file:
+      - .env
+    ports:
+      - "${APP_PORT}:8000"
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-net
+
+volumes:
+  todo_db_data:
+
+networks:
+  app-net:
+    driver: bridge
